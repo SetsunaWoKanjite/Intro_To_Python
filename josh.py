@@ -76,7 +76,7 @@ async def  deposit(ctx,amount = None):
     bal = await update_bank(ctx.author)
 
     amount = int(amount)
-    if amount>bal[0]:
+    if amount<bal[0]:
         await ctx.send("You don't have enough money")
         return
     if amount<0:
@@ -86,7 +86,89 @@ async def  deposit(ctx,amount = None):
     await update_bank(ctx.author,-1*amount)
     await update_bank(ctx.author,amount,"bank")
 
-    await ctx.send(f"You depsited {amount} Tempest Tokens!")
+    await ctx.send(f"You deposited {amount} Tempest Tokens!")
+
+
+@client.command()
+async def send(ctx,member:discord.Member,amount = None):
+    await open_account(ctx.author)    
+    await open_account(member)    
+
+
+    if amount == None:
+        await ctx.send("Please enter the amount")
+        return
+    
+    bal = await update_bank(ctx.author)
+    if amount == "all":
+        amount = bal[0]
+
+    amount = int(amount)
+    if amount>bal[0]:
+        await ctx.send("You don't have enough money")
+        return
+    if amount<0:
+        await ctx.send("Amount must be above zero")
+        return
+
+    await update_bank(ctx.author,-1*amount,"wallet")
+    await update_bank(member,amount,"wallet")
+
+    await ctx.send(f"You gave {amount} Tempest Tokens!")
+
+@client.command()
+async def rob(ctx,member:discord.Member):
+    await open_account(ctx.author)    
+    await open_account(member)    
+    
+    bal = await update_bank(member)
+
+    if bal[0]<100:
+        await ctx.send("It's not worth it!")
+        return
+
+    earnings = random.randrange(0, bal[0])
+
+    await update_bank(ctx.author,earnings)
+    await update_bank(member,-1*earnings)
+
+    await ctx.send(f"You robbed {member} and got {earnings} Tempest Tokens!")
+
+
+@client.command()
+async def slots(ctx,amount = None):
+    await open_account(ctx.author)    
+    if amount == None:
+        await ctx.send("Please enter the amount")
+        return
+    
+    bal = await update_bank(ctx.author)
+
+    amount = int(amount)
+    if amount>bal[0]:
+        await ctx.send("You don't have enough money")
+        return
+    if amount<0:
+        await ctx.send("Amount must be above zero")
+        return
+
+    final = []
+    for i in range(3):
+        #a = random.choice(["X","0","Q","E"])
+        a = random.choice(["E","E","E","E"])
+        final.append(a)
+
+    await ctx.send(str(final))
+ 
+    if final[0] == final[1] and final[0] == final[2] and final[2] and final[1]:
+        await update_bank(ctx.author,3*amount)
+        await ctx.send("YOU WON THE JACKPOT!")
+    elif final[0] == final[1] or final[0] == final[2] or final[2] == final[1]:
+        await update_bank(ctx.author,1*amount)
+        await ctx.send("You won!")
+    else:
+        await update_bank(ctx.author,-1*amount)
+        await ctx.send("You lost!")
 
 async def open_account(user):
 
